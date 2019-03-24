@@ -8,10 +8,10 @@ getChannel
     channel.consume(
       SEND_URL,
       async url => {
-        const pageSource = await getSourceCode(url.content.toString());
+        const pageData = await getSourceCode(url.content.toString());
         channel.sendToQueue(
           SEND_SOURCE_CODE,
-          new Buffer.from(pageSource.toString())
+          new Buffer.from(JSON.stringify(pageData))
         );
       },
       { noAck: true }

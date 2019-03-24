@@ -1,11 +1,5 @@
 import React, { Component } from "react";
-import {
-  Button,
-  TextField,
-  Grid,
-  Icon,
-  Typography
-} from "@material-ui/core";
+import { Button, TextField, Grid, Icon, Typography } from "@material-ui/core";
 import Snackbar from "../Snackbar/Snackbar";
 import axios from "axios";
 
@@ -24,12 +18,10 @@ class Sidebar extends Component {
       return;
     }
     this.props.settingLoading(true);
-    console.log("Check 1")
+    console.log("Check 1");
     axios
       .get("http://localhost:3001/?url=" + this.state.url)
-      .then(res => {
-        
-      })
+      .then(res => {})
       .catch(error => {
         this.props.settingLoading(false);
         alert(error.message);

@@ -17,7 +17,7 @@ export class Body extends Component {
   }
   componentDidMount = () => {
     socket.on("pageSource", pageSource => {
-      this.setState({isLoading: false})
+      this.setState({ isLoading: false });
       this.setState({ pageSource }, () => {
         document.getElementById(pageSource).onload = () => {
           document
@@ -36,6 +36,9 @@ export class Body extends Component {
   };
   settingLoading = isLoading => {
     this.setState({ isLoading });
+    if (isLoading) {
+      this.setState({ selectedElementSelector: "" });
+    }
   };
   render() {
     return (
@@ -67,16 +70,17 @@ export class Body extends Component {
             )}
           </Grid>
         </Grid>
-        {this.state.isLoading ?
+        {this.state.isLoading ? (
           <CircularProgress
-          style={{
-            position: "absolute",
-            zIndex: 10000,
-            textAlign: "center",
-            top: "50%",
-            left: "60%"
-          }}
-        />: null}
+            style={{
+              position: "absolute",
+              zIndex: 10000,
+              textAlign: "center",
+              top: "50%",
+              left: "60%"
+            }}
+          />
+        ) : null}
       </Fragment>
     );
   }

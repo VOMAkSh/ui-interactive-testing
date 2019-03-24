@@ -1,7 +1,6 @@
 const cors = require("cors");
 const fs = require("fs");
-const path = require("path");
-const helmet = require("helmet");
+const stripJs = require("strip-js");
 const app = require("./config");
 const createChannel = require("./rabbitmq");
 const sendUrlReceiver = require("./sendUrlReceiver");
@@ -24,17 +23,41 @@ app.get("/", (req, res) => {
       channel.sendToQueue(SEND_URL, new Buffer.from(url));
       channel.consume(
         SEND_SOURCE_CODE,
-        pageSource => {
-          const folder = `${url.split("//")[1]}-${new Date().getTime()}`;
+        pageData => {
+          const pageDataParsed = JSON.parse(pageData.content.toString());
+          let { url, sourceCode } = pageDataParsed;
+          if (url.endsWith("/")) {
+            url = url.slice(0, url.length - 1);
+          }
+          while (url.indexOf("/") !== -1) {
+            url = url.replace("/", "-");
+          }
+          while (url.indexOf("?") !== -1) {
+            url = url.replace("?", "-");
+          }
+          const folder = `${url}-${new Date().getTime()}`;
+          console.log(folder);
           try {
             fs.mkdirSync("snapshots/" + folder);
           } catch (error) {
             console.log(error);
             return;
           }
+          sourceCode = stripJs(sourceCode);
+          sourceCode += `<script type='text/javascript'>
+          document.querySelectorAll("a").forEach(element => {
+            element.removeAttribute("href");
+          });
+          document.addEventListener('click', event => {
+            event.preventDefault();
+          });
+          document.addEventListener('keypress', event => {
+            event.preventDefault();
+          })
+        </script>`;
           fs.writeFile(
             "snapshots/" + folder + "/index.html",
-            pageSource.content.toString(),
+            sourceCode,
             { flag: "w" },
             error => {
               if (error) {
@@ -58,10 +81,4 @@ app.get("/", (req, res) => {
         error
       });
     });
-});
-
-app.get("/test1", (req, res) => {
-  res.send({
-    data: "Hello Chintu Ji!!!!!"
-  });
 });

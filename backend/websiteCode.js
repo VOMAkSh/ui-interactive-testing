@@ -5,20 +5,16 @@ module.exports = async url => {
   const page = await browser.newPage();
   try {
     await page.goto(url, {
-      waitUntil: "load",
-      timeout: 20000
+      waitUntil: "networkidle0"
     });
   } catch (error) {
     return error;
   }
   let sourceCode = await page.content();
-  sourceCode += `<script type='text/javascript'>
-    document.addEventListener('click', event => {
-      event.preventDefault();
-    });
-    document.addEventListener('keypress', event => {
-      event.preventDefault();
-    })
-  </script>`;
-  return sourceCode;
+  let URL = await page.url();
+  await browser.close();
+  return {
+    sourceCode,
+    url: URL
+  };
 };
